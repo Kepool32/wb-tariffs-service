@@ -14,9 +14,7 @@ export class TariffsController {
         data: result,
       };
     } catch (error) {
-      throw new BadRequestException(
-        `Ошибка при обновлении тарифов: ${error.message}`,
-      );
+      throw new BadRequestException(`Ошибка при обновлении тарифов: ${error}`);
     }
   }
 }

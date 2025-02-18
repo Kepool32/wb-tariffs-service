@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { google } from 'googleapis';
 import { KnexService } from '../../common/knex/knex.service';
 import config from '../../config/google-sheets.config';
+import { GoogleSheetsResponse, Tariff } from '../../interfaces/interfaces';
 
 @Injectable()
 export class GoogleSheetsService {
@@ -16,10 +17,10 @@ export class GoogleSheetsService {
 
   async ensureSheetExists(auth: any, spreadsheetId: string): Promise<void> {
     try {
-      const response = await this.sheets.spreadsheets.get({
+      const response = (await this.sheets.spreadsheets.get({
         auth,
         spreadsheetId,
-      });
+      })) as GoogleSheetsResponse;
 
       const sheets = response.data.sheets || [];
       const sheetExists = sheets.some(
@@ -48,7 +49,7 @@ export class GoogleSheetsService {
         this.logger.log(`Лист '${this.sheetName}' успешно создан.`);
       }
     } catch (error) {
-      this.logger.error(`Ошибка при проверке/создании листа: ${error.message}`);
+      this.logger.error(`Ошибка при проверке/создании листа: ${error}`);
     }
   }
 
@@ -77,7 +78,7 @@ export class GoogleSheetsService {
         );
       } catch (error) {
         this.logger.error(
-          `Ошибка при добавлении данных в таблицу ${sheetId}: ${error.message}`,
+          `Ошибка при добавлении данных в таблицу ${sheetId}: ${error}`,
         );
       }
     }
@@ -89,7 +90,7 @@ export class GoogleSheetsService {
       .select('*')
       .orderBy('boxDeliveryBase', 'asc');
 
-    const data: any[][] = [
+    const data: [string, string, string, string, string, string][] = [
       [
         'Warehouse Name',
         'Delivery And Storage Expr',
@@ -99,16 +100,18 @@ export class GoogleSheetsService {
         'Storage Liter',
       ],
     ];
-    tariffs.forEach((tariff) => {
+
+    tariffs.forEach((tariff: Tariff) => {
       data.push([
         tariff.warehouseName,
-        tariff.boxDeliveryAndStorageExpr,
-        tariff.boxDeliveryBase,
-        tariff.boxDeliveryLiter,
-        tariff.boxStorageBase,
-        tariff.boxStorageLiter,
+        tariff.boxDeliveryAndStorageExpr || '',
+        tariff.boxDeliveryBase.toString(),
+        tariff.boxDeliveryLiter.toString(),
+        tariff.boxStorageBase.toString(),
+        tariff.boxStorageLiter.toString(),
       ]);
     });
+
     await this.appendDataToMultipleSheets(data);
     this.logger.log('Экспорт данных тарифов в Google Sheets завершён.');
   }

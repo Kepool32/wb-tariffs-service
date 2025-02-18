@@ -17,10 +17,7 @@ export class TariffsCronService {
       console.log('Тарифы обновлены успешно');
       await this.googleSheetsService.exportTariffsData();
     } catch (error) {
-      console.error(
-        'Ошибка при обновлении или экспорте тарифов:',
-        error.message,
-      );
+      console.error('Ошибка при обновлении или экспорте тарифов:', error);
     }
   }
 }
