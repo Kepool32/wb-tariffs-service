@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { KnexService } from '../../common/knex/knex.service';
 import { ConfigService } from '@nestjs/config';
 import { DataResponse, Tariff } from '../../interfaces/interfaces';
+import { GoogleSheetsService } from '../google-sheets/google-sheets.service';
 
 @Injectable()
 export class TariffsService {
@@ -13,6 +14,7 @@ export class TariffsService {
     private readonly httpService: HttpService,
     private readonly knexService: KnexService,
     private readonly configService: ConfigService,
+    private readonly googleSheetsService: GoogleSheetsService,
   ) {
     this.API_URL = this.configService.get<string>('WB_API_URL');
     this.API_KEY = this.configService.get<string>('WB_API_KEY');
@@ -59,7 +61,7 @@ export class TariffsService {
     await knex('tariffs').insert(tariffs).onConflict('warehouseName').merge();
   }
 
-  async updateTariffs(date?: string): Promise<Tariff[]> {
+  async updateTariffs(date?: string): Promise<DataResponse> {
     const dateToUse = date || this.getCurrentDate();
 
     try {
@@ -68,7 +70,7 @@ export class TariffsService {
       }
 
       const response = await this.httpService
-        .get(this.API_URL, {
+        .get<DataResponse>(this.API_URL, {
           headers: {
             Authorization: this.API_KEY,
             'Content-Type': 'application/json',
@@ -82,6 +84,7 @@ export class TariffsService {
       }
 
       await this.saveTariffs(response.data);
+      await this.googleSheetsService.exportTariffsData();
       return response.data;
     } catch (error) {
       throw new Error(`Не удалось получить тарифы: ${error}`);

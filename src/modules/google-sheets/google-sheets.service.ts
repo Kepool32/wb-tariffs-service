@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import { KnexService } from '../../common/knex/knex.service';
 import config from '../../config/google-sheets.config';
 import { GoogleSheetsResponse, Tariff } from '../../interfaces/interfaces';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class GoogleSheetsService {
@@ -15,7 +16,10 @@ export class GoogleSheetsService {
     this.sheetIds = config().sheetIds;
   }
 
-  async ensureSheetExists(auth: any, spreadsheetId: string): Promise<void> {
+  async ensureSheetExists(
+    auth: OAuth2Client,
+    spreadsheetId: string,
+  ): Promise<void> {
     try {
       const response = (await this.sheets.spreadsheets.get({
         auth,
@@ -53,7 +57,9 @@ export class GoogleSheetsService {
     }
   }
 
-  async appendDataToMultipleSheets(data: any[][]): Promise<void> {
+  async appendDataToMultipleSheets(
+    data: [string, string, string, string, string, string][],
+  ): Promise<void> {
     const auth = new google.auth.JWT(
       config().clientEmail,
       undefined,
@@ -64,6 +70,12 @@ export class GoogleSheetsService {
     for (const sheetId of this.sheetIds) {
       try {
         await this.ensureSheetExists(auth, sheetId);
+
+        await this.sheets.spreadsheets.values.clear({
+          auth,
+          spreadsheetId: sheetId,
+          range: `${this.sheetName}!A1:Z`,
+        });
 
         await this.sheets.spreadsheets.values.append({
           auth,
@@ -105,10 +117,10 @@ export class GoogleSheetsService {
       data.push([
         tariff.warehouseName,
         tariff.boxDeliveryAndStorageExpr || '',
-        tariff.boxDeliveryBase.toString(),
-        tariff.boxDeliveryLiter.toString(),
-        tariff.boxStorageBase.toString(),
-        tariff.boxStorageLiter.toString(),
+        tariff.boxDeliveryBase ? tariff.boxDeliveryBase.toString() : '',
+        tariff.boxDeliveryLiter ? tariff.boxDeliveryLiter.toString() : '',
+        tariff.boxStorageBase ? tariff.boxStorageBase.toString() : '',
+        tariff.boxStorageLiter ? tariff.boxStorageLiter.toString() : '',
       ]);
     });
 
