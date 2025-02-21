@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { TariffsService } from './tariffs.service';
+import { TariffsPresenter } from './tariffs.presenter';
 
 @Injectable()
 export class TariffsCronService {
-  constructor(private readonly tariffsService: TariffsService) {}
+  constructor(private readonly tariffsService: TariffsPresenter) {}
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {

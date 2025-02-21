@@ -8,6 +8,7 @@ import { TariffsModule } from './modules/tariffs/tariffs.module';
 import { ConfigModule } from '@nestjs/config';
 import { GoogleSheetsModule } from './modules/google-sheets/google-sheets.module';
 import { GoogleSheetsService } from './modules/google-sheets/google-sheets.service';
+import { TariffsPresenter } from './modules/tariffs/tariffs.presenter';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { GoogleSheetsService } from './modules/google-sheets/google-sheets.servi
   providers: [
     TariffsService,
     TariffsCronService,
+    TariffsPresenter,
     KnexService,
     GoogleSheetsService,
   ],

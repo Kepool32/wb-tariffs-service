@@ -7,6 +7,7 @@ import { TariffsCronService } from './tariffs-cron.service';
 import { TariffsController } from './tariffs.controller';
 import { ConfigModule } from '@nestjs/config';
 import { GoogleSheetsModule } from '../google-sheets/google-sheets.module';
+import { TariffsPresenter } from './tariffs.presenter';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { GoogleSheetsModule } from '../google-sheets/google-sheets.module';
     GoogleSheetsModule,
   ],
   controllers: [TariffsController],
-  providers: [TariffsService, TariffsCronService],
+  providers: [TariffsService, TariffsCronService, TariffsPresenter],
 })
 export class TariffsModule {}

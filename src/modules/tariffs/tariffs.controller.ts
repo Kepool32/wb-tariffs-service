@@ -1,20 +1,12 @@
-import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
-import { TariffsService } from './tariffs.service';
+import { Controller, Get, Query } from '@nestjs/common';
+import { TariffsPresenter } from './tariffs.presenter';
 
 @Controller('tariffs')
 export class TariffsController {
-  constructor(private readonly tariffsService: TariffsService) {}
+  constructor(private readonly tariffsPresenter: TariffsPresenter) {}
 
   @Get('update')
   async updateTariffs(@Query('date') date: string) {
-    try {
-      const result = await this.tariffsService.updateTariffs(date);
-      return {
-        message: 'Тарифы успешно обновлены',
-        data: result,
-      };
-    } catch (error) {
-      throw new BadRequestException(`Ошибка при обновлении тарифов: ${error}`);
-    }
+    return await this.tariffsPresenter.updateTariffs(date);
   }
 }
